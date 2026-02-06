@@ -61,15 +61,15 @@ public class CatScript : MonoBehaviour
         if (CatType.Callie == catType)
         {
             _MoveSpeed = 3f;
-            _Health = 20 * 20;
+            _Health = 10 * 20;
         } else if (CatType.Dudong == catType)
         {
             _MoveSpeed = 1f;
-            _Health = 8 * 20;
+            _Health = 4 * 20;
         } else if (CatType.Oreo == catType)
         {
             _MoveSpeed = 2f;
-            _Health = 4 * 20;
+            _Health = 2 * 20;
             _AttackRange = _rangedAttackRange; // Oreo uses ranged attack range
         }
 

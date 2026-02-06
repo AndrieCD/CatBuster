@@ -14,7 +14,8 @@ public class KeyDropScript : MonoBehaviour
     {
         
     }
-    private void OnCollisionEnter(Collision collision)
+
+    private void OnTriggerEnter(Collider collision)
     {
         Debug.Log(collision.gameObject.name);
         GameObject player = collision.gameObject;
