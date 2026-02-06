@@ -24,14 +24,19 @@ public class PlayerController : MonoBehaviour
     GameObject angelModel;
 
     // Combat vars
-    int MaxHealth = 5;
+    int MaxHealth = 100;
     int CurrentHealth;
+    float MaxEnergy = 100f;
+    float CurrentEnergy;
+    bool IsDead = false;
+    bool IsSprinting = false;
 
     private void Awake( )
     {
         navMeshAgent = GetComponent<NavMeshAgent>( );
         angelModel = transform.Find("AngelModel").gameObject;
         CurrentHealth = MaxHealth;
+        CurrentEnergy = MaxEnergy;
     }
 
     private void Update( )
@@ -40,9 +45,14 @@ public class PlayerController : MonoBehaviour
         Camera.main.transform.position = transform.position + new Vector3(0, 4.5f, -2.97f);
 
         if (_sprintAction.ReadValue<float>( ) > 0)
+        {
+            IsSprinting = true;
             navMeshAgent.speed = 5f;
-        else
+        } else
+        {
+            IsSprinting = false;
             navMeshAgent.speed = 2f;
+        }
 
 
         //Vector2 mouseScreenPos = Mouse.current.position.ReadValue( );
@@ -65,6 +75,25 @@ public class PlayerController : MonoBehaviour
                canFire = true;
                lastFireTime = 0f;
            }
+        }
+
+
+        // Sprinting drains energy
+        if (IsSprinting)
+        {
+            CurrentEnergy -= 20f * Time.deltaTime;
+            if (CurrentEnergy <= 0)
+            {
+                CurrentEnergy = 0;
+                IsSprinting = false;
+                navMeshAgent.speed = 2f;
+            }
+        } else
+        {
+            // Regenerate energy when not sprinting
+            CurrentEnergy += 10f * Time.deltaTime;
+            if (CurrentEnergy > MaxEnergy)
+                CurrentEnergy = MaxEnergy;
         }
     }
 
@@ -97,7 +126,12 @@ public class PlayerController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             Vector3 lookPos = hit.point;
-            angelModel.transform.LookAt(lookPos);
+            Vector3 direction = lookPos - angelModel.transform.position;
+            direction.y = 0f;
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                angelModel.transform.rotation = Quaternion.LookRotation(direction);
+            }
         }
 
         // instantiate projectile
@@ -155,7 +189,7 @@ public class PlayerController : MonoBehaviour
         GameObject projectile = collision.gameObject;
         if (projectile.CompareTag("Hairball"))
         {
-            TakeDamage(1);
+            TakeDamage(20);
             Destroy(projectile);
         }
 

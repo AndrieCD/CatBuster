@@ -3,7 +3,12 @@ guid: 43f88a6e75f91a845a03c9064b209033
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: HP_MTL
+    second: {fileID: 2100000, guid: 297836f4f3375eb4c822a05b8b8142bf, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

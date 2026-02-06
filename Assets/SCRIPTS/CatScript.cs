@@ -108,7 +108,7 @@ public class CatScript : MonoBehaviour
     private void Roam( )
     {
         _Agent.isStopped = false;
-        if (Vector3.Distance(transform.position, _roamDestination) < 0.2f)
+        if (Vector3.Distance(transform.position, _roamDestination) < 1f)
         {
             SetNewRoamDestination( );
         } else
@@ -151,12 +151,20 @@ public class CatScript : MonoBehaviour
             // Ranged attack
             Debug.Log("Oreo shoots projectile!");
             ShootProjectile( );
-        } else
+        } else if (catType == CatType.Callie && _Health <= 10)
+        {
+            _AttackRange = _rangedAttackRange; // Oreo uses ranged attack range
+                                               // Ranged attack
+            _attackCooldown = 0.75f; // faster attack speed
+            Debug.Log("Callie shoots projectile!");
+            ShootProjectile( );
+        }
+        else
         {
             // Melee attack
             Debug.Log("Attack Target");
             if (_Player != null)
-                _Player.TakeDamage(1);
+                _Player.TakeDamage(20);
         }
 
         // Start cooldown
@@ -186,7 +194,7 @@ public class CatScript : MonoBehaviour
         GameObject projectile = collision.gameObject;
         if (projectile.CompareTag("Treats"))
         {
-            TakeDamage(1);
+            TakeDamage(20);
             Destroy(projectile);
         }
 
@@ -194,6 +202,7 @@ public class CatScript : MonoBehaviour
         {
             IsDead = true;
             _Agent.isStopped = true;
+            gameObject.GetComponent<Collider>( ).enabled = false;
             Destroy(gameObject, 1f);
         }
     }
