@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class KeyDropScript : MonoBehaviour
 {
@@ -12,5 +13,18 @@ public class KeyDropScript : MonoBehaviour
     void Update()
     {
         
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(collision.gameObject.name);
+        GameObject player = collision.gameObject;
+        if (player.CompareTag("Player"))
+        {
+            // destroy "Gate" object
+            GameObject gate = GameObject.Find("Gate");
+
+            Destroy(gate);
+            Destroy(gameObject);
+        }
     }
 }

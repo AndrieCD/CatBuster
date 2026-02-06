@@ -41,9 +41,15 @@ public class CatScript : MonoBehaviour
     [SerializeField] private Transform projectileOrigin;
     private float _rangedAttackRange = 5f;
 
+    // Animation
+    private Animator _animator;
+
     protected void Awake( )
     {
         _Agent = GetComponent<NavMeshAgent>( );
+
+        // Find the Animator on the direct child (assumes only one child with Animator)
+        _animator = GetComponentInChildren<Animator>( );
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
@@ -55,15 +61,15 @@ public class CatScript : MonoBehaviour
         if (CatType.Callie == catType)
         {
             _MoveSpeed = 3f;
-            _Health = 20;
+            _Health = 20 * 20;
         } else if (CatType.Dudong == catType)
         {
             _MoveSpeed = 1f;
-            _Health = 8;
+            _Health = 8 * 20;
         } else if (CatType.Oreo == catType)
         {
             _MoveSpeed = 2f;
-            _Health = 4;
+            _Health = 4 * 20;
             _AttackRange = _rangedAttackRange; // Oreo uses ranged attack range
         }
 
@@ -74,6 +80,10 @@ public class CatScript : MonoBehaviour
     private void Update( )
     {
         if (IsDead || _isOnAttackCooldown) return;
+
+        //// Set move animation (speed parameter)
+        //if (_animator != null)
+        //    _animator.SetFloat("Speed", _Agent.velocity.magnitude);
 
         if (Vector3.Distance(transform.position, _Target.position) < _roamRange)
         {
@@ -146,6 +156,10 @@ public class CatScript : MonoBehaviour
         if (_Target != null)
             transform.LookAt(_Target);
 
+        // Trigger attack animation
+        if (_animator != null)
+            _animator.SetTrigger("Attack");
+
         if (catType == CatType.Oreo)
         {
             // Ranged attack
@@ -154,12 +168,10 @@ public class CatScript : MonoBehaviour
         } else if (catType == CatType.Callie && _Health <= 10)
         {
             _AttackRange = _rangedAttackRange; // Oreo uses ranged attack range
-                                               // Ranged attack
             _attackCooldown = 0.75f; // faster attack speed
             Debug.Log("Callie shoots projectile!");
             ShootProjectile( );
-        }
-        else
+        } else
         {
             // Melee attack
             Debug.Log("Attack Target");
@@ -196,6 +208,10 @@ public class CatScript : MonoBehaviour
         {
             TakeDamage(20);
             Destroy(projectile);
+
+            // Trigger hit animation
+            if (_animator != null)
+                _animator.SetTrigger("Hit");
         }
 
         if (_Health <= 0)
@@ -203,6 +219,11 @@ public class CatScript : MonoBehaviour
             IsDead = true;
             _Agent.isStopped = true;
             gameObject.GetComponent<Collider>( ).enabled = false;
+
+            // Trigger death animation
+            if (_animator != null)
+                _animator.SetBool("IsDead", IsDead);
+
             Destroy(gameObject, 1f);
         }
     }
@@ -211,5 +232,9 @@ public class CatScript : MonoBehaviour
     {
         Debug.Log($"{catType} took {v} damage, {_Health} remaining");
         _Health -= v;
+
+        // Trigger hit animation
+        if (_animator != null)
+            _animator.SetTrigger("Hit");
     }
 }

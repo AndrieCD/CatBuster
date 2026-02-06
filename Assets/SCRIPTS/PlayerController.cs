@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
 
     // Projectile Prefab
     [SerializeField] GameObject projectile;
-    [SerializeField]  Transform projectileOrigin;
+    [SerializeField] Transform projectileOrigin;
     float CooldownTime = 0.5f;
     float lastFireTime = 0f;
     bool canFire = true;
@@ -31,12 +31,16 @@ public class PlayerController : MonoBehaviour
     bool IsDead = false;
     bool IsSprinting = false;
 
+    // Animator
+    private Animator animator;
+
     private void Awake( )
     {
         navMeshAgent = GetComponent<NavMeshAgent>( );
         angelModel = transform.Find("AngelModel").gameObject;
         CurrentHealth = MaxHealth;
         CurrentEnergy = MaxEnergy;
+        animator = angelModel.GetComponent<Animator>( );
     }
 
     private void Update( )
@@ -54,29 +58,21 @@ public class PlayerController : MonoBehaviour
             navMeshAgent.speed = 2f;
         }
 
-
-        //Vector2 mouseScreenPos = Mouse.current.position.ReadValue( );
-
-        //Ray ray = Camera.main.ScreenPointToRay(mouseScreenPos);
-        //RaycastHit hit;
-        //if (Physics.Raycast(ray, out hit))
-        //{
-        //    MoveAgentToPoint(hit.point);
-        //    Debug.Log($"Move to {hit.point}");
-        //}
+        // Set Speed parameter for WALK/RUN
+        if (animator != null)
+            animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
 
         if (!canFire)
         {
-           if (lastFireTime < CooldownTime)
-           {
-               lastFireTime += Time.deltaTime;
-           } else
-           {
-               canFire = true;
-               lastFireTime = 0f;
-           }
+            if (lastFireTime < CooldownTime)
+            {
+                lastFireTime += Time.deltaTime;
+            } else
+            {
+                canFire = true;
+                lastFireTime = 0f;
+            }
         }
-
 
         // Sprinting drains energy
         if (IsSprinting)
@@ -134,6 +130,10 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        // Trigger attack animation
+        if (animator != null)
+            animator.SetTrigger("Attack");
+
         // instantiate projectile
         Instantiate(projectile, projectileOrigin.position, projectileOrigin.rotation);
 
@@ -170,10 +170,19 @@ public class PlayerController : MonoBehaviour
     {
         Debug.Log($"Player takes {damage} damage.");
         CurrentHealth -= damage;
-        if (CurrentHealth <= 0)
+
+        // Trigger hit animation
+        if (animator != null)
+            animator.SetTrigger("Hit");
+
+        if (CurrentHealth <= 0 && !IsDead)
         {
-            // Handle player death
+            IsDead = true;
+            //// Trigger death animation
+            //if (animator != null)
+            //    animator.SetBool("IsDead", true);
             Debug.Log("Player has died.");
+
         }
     }
 
@@ -184,20 +193,34 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        //if (IsDead) return;
-
         GameObject projectile = collision.gameObject;
         if (projectile.CompareTag("Hairball"))
         {
             TakeDamage(20);
             Destroy(projectile);
         }
+    }
 
-        //if (_Health <= 0)
-        //{
-        //    IsDead = true;
-        //    _Agent.isStopped = true;
-        //    Destroy(gameObject, 1f);
-        //}
+    // Heal
+    public void Heal(int healAmount)
+    {
+        CurrentHealth += healAmount;
+        if (CurrentHealth > MaxHealth)
+            CurrentHealth = MaxHealth;
+    }
+
+    // Restore Energy
+    public void RestoreEnergy(float energyAmount)
+    {
+        CurrentEnergy += energyAmount;
+        if (CurrentEnergy > MaxEnergy)
+            CurrentEnergy = MaxEnergy;
+    }
+
+    // Call this when the player wins
+    public void Win( )
+    {
+        if (animator != null)
+            animator.SetBool("HasWon", true);
     }
 }
