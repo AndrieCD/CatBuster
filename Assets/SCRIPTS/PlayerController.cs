@@ -37,7 +37,7 @@ public class PlayerController : MonoBehaviour
     private void Update( )
     {
         // Attach camera to player with offset
-        Camera.main.transform.position = transform.position + new Vector3(0, 4.5f, -5f);
+        Camera.main.transform.position = transform.position + new Vector3(0, 4.5f, -2.97f);
 
         if (_sprintAction.ReadValue<float>( ) > 0)
             navMeshAgent.speed = 5f;
@@ -115,6 +115,7 @@ public class PlayerController : MonoBehaviour
 
     private void _moveAction_performed(InputAction.CallbackContext obj)
     {
+        Debug.Log("Move action performed");
         Vector2 mouseScreenPos = Mouse.current.position.ReadValue( );
 
         Ray ray = Camera.main.ScreenPointToRay(mouseScreenPos);
@@ -145,5 +146,24 @@ public class PlayerController : MonoBehaviour
     private void OnDisable( )
     {
         _playerActionMap.Disable( );
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        //if (IsDead) return;
+
+        GameObject projectile = collision.gameObject;
+        if (projectile.CompareTag("Hairball"))
+        {
+            TakeDamage(1);
+            Destroy(projectile);
+        }
+
+        //if (_Health <= 0)
+        //{
+        //    IsDead = true;
+        //    _Agent.isStopped = true;
+        //    Destroy(gameObject, 1f);
+        //}
     }
 }

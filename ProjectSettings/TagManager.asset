@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - Treats
+  - Hairball
+  - Fence
   layers:
   - Default
   - TransparentFX

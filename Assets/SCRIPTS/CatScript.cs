@@ -34,7 +34,12 @@ public class CatScript : MonoBehaviour
     // Roaming fields
     private CatState _state = CatState.Roaming;
     private Vector3 _roamDestination;
-    private float _roamRange = 3f;
+    private float _roamRange = 7f;
+
+    // Ranged attack fields (for Oreo)
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Transform projectileOrigin;
+    private float _rangedAttackRange = 5f;
 
     protected void Awake( )
     {
@@ -51,7 +56,6 @@ public class CatScript : MonoBehaviour
         {
             _MoveSpeed = 3f;
             _Health = 20;
-            _roamRange = 6f;
         } else if (CatType.Dudong == catType)
         {
             _MoveSpeed = 1f;
@@ -60,6 +64,7 @@ public class CatScript : MonoBehaviour
         {
             _MoveSpeed = 2f;
             _Health = 4;
+            _AttackRange = _rangedAttackRange; // Oreo uses ranged attack range
         }
 
         _Agent.speed = _MoveSpeed;
@@ -137,15 +142,34 @@ public class CatScript : MonoBehaviour
 
     private void AttackTarget( )
     {
-        Debug.Log("Attack Target");
         _Agent.isStopped = true;
-        if (_Player != null)
-            _Player.TakeDamage(1);
         if (_Target != null)
             transform.LookAt(_Target);
 
+        if (catType == CatType.Oreo)
+        {
+            // Ranged attack
+            Debug.Log("Oreo shoots projectile!");
+            ShootProjectile( );
+        } else
+        {
+            // Melee attack
+            Debug.Log("Attack Target");
+            if (_Player != null)
+                _Player.TakeDamage(1);
+        }
+
         // Start cooldown
         StartCoroutine(AttackCooldown( ));
+    }
+
+    private void ShootProjectile( )
+    {
+        if (projectilePrefab != null && projectileOrigin != null)
+        {
+            // instantiate projectile
+            Instantiate(projectilePrefab, projectileOrigin.position, projectileOrigin.rotation);
+        }
     }
 
     private IEnumerator AttackCooldown( )
