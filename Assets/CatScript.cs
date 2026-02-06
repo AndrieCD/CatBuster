@@ -51,6 +51,7 @@ public class CatScript : MonoBehaviour
         {
             _MoveSpeed = 3f;
             _Health = 20;
+            _roamRange = 6f;
         } else if (CatType.Dudong == catType)
         {
             _MoveSpeed = 1f;
@@ -58,7 +59,7 @@ public class CatScript : MonoBehaviour
         } else if (CatType.Oreo == catType)
         {
             _MoveSpeed = 2f;
-            _Health = 5;
+            _Health = 4;
         }
 
         _Agent.speed = _MoveSpeed;
